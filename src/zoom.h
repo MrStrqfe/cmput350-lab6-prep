@@ -48,6 +48,7 @@ private:
 
     // World coordinate bounds
     sf::Vector2f mWorldSize;
+    float mOriginalAspectRatio;
 
     // Zoom state
     bool mIsZooming;
