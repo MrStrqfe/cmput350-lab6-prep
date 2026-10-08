@@ -92,8 +92,8 @@ void ZoomApp::updateViewAfterResize() {
 
     // Calculate newViewport based on aspect ratios of window and of mWorldSize. Then:
     auto newAspectRatio = static_cast<float>(mWindow.getSize().x) / static_cast<float>(mWindow.getSize().y);
-    std::cout << mWindow.getSize().x << " / " << mWindow.getSize().y << " = " << newAspectRatio << "\n";
-    std::cout << mOriginalAspectRatio << "\n";
+    //std::cout << mWindow.getSize().x << " / " << mWindow.getSize().y << " = " << newAspectRatio << "\n";
+    //std::cout << mOriginalAspectRatio << "\n";
 
     // Case 1: If new window size is wider than world size, the width is changed
     if (newAspectRatio > mOriginalAspectRatio) {
@@ -137,6 +137,26 @@ void ZoomApp::updateZoomView(sf::Vector2i mousePos) {
     //  HINT: Determine the steps to go from the desired center to the top-left of this new
     //        world-space rectangle, then from this top-left to the thing you're pointing at,
     //        using our above computed vars. Then solve the equation for the desired center.
+    sf::FloatRect vp = mWorldViewDefault.getViewport();
+    sf::Vector2u winSize = mWindow.getSize();
+    
+    // 1) Mouse relative to viewport top-left in pixels
+    sf::Vector2f mouseInVp(mousePos.x - vp.position.x * winSize.x,
+                           mousePos.y - vp.position.y * winSize.y);
+    
+    // 2) as a percentage of the viewport
+    sf::Vector2f pct(mouseInVp.x / (vp.size.x * winSize.x),
+                     mouseInVp.y / (vp.size.y * winSize.y));
+    
+    // 3 position in world units
+    sf::Vector2f worldPos(pct.x * mWorldSize.x, pct.y * mWorldSize.y);
+
+    // 4 new center
+    sf::Vector2f zoomedSize = mWorldSize / ZOOM_FACTOR;
+    sf::Vector2f center(worldPos.x + zoomedSize.x * (0.5f - pct.x),
+                        worldPos.y + zoomedSize.y * (0.5f - pct.y));
+    
+    mWorldViewZoomed.setCenter(center);
 }
 
 void ZoomApp::render() {
